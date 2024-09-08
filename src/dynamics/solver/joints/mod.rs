@@ -132,6 +132,10 @@ pub trait Joint: Component + PositionConstraint + AngularConstraint {
     /// Returns the angular velocity damping of the joint.
     fn damping_angular(&self) -> Scalar;
 
+    fn debug_render(&self, gizmos: &mut Gizmos<PhysicsGizmos>, pos: Position, rot: Rotation) {
+        let _ = (gizmos, pos, rot);
+    }
+
     /// Applies a positional correction that aligns the positions of the local attachment points `r1` and `r2`.
     ///
     /// Returns the force exerted by the alignment.

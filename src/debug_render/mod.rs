@@ -12,6 +12,7 @@ pub use gizmos::*;
 
 use crate::prelude::*;
 use bevy::{
+    color::palettes::css::{AQUAMARINE, BLUE, FUCHSIA},
     ecs::{intern::Interned, query::Has, schedule::ScheduleLabel},
     prelude::*,
 };
@@ -375,19 +376,34 @@ fn debug_render_joints<T: Joint>(
         if let Ok([(pos1, rot1, sleeping1), (pos2, rot2, sleeping2)]) =
             bodies.get_many(joint.entities())
         {
+            joint.debug_render(&mut gizmos, *pos1, *rot1);
+
             if let Some(mut anchor_color) = config.joint_anchor_color {
+                let hsla = Hsla::from(anchor_color).to_vec4();
                 // If both bodies are sleeping, multiply the color by the sleeping color multiplier
                 if sleeping1 && sleeping2 {
-                    let hsla = Hsla::from(anchor_color).to_vec4();
+                    let [h, s, l, a] = Hsla::from(anchor_color).to_f32_array();
+                    // If both bodies are sleeping, multiply the color by the sleeping color multiplier
+                    let mut anchor_color2 = Color::hsla((h + 180.0) % 360.0, s, l, a);
+                    let hsla2 = Hsla::from(anchor_color2).to_vec4();
                     if let Some(mul) = render_config.map_or(config.sleeping_color_multiplier, |c| {
                         c.sleeping_color_multiplier
                     }) {
                         anchor_color = Hsla::from_vec4(hsla * Vec4::from_array(mul)).into();
+                        anchor_color2 = Hsla::from_vec4(hsla2 * Vec4::from_array(mul)).into();
                     }
                 }
 
-                gizmos.draw_line(pos1.0, pos1.0 + rot1 * joint.local_anchor_1(), anchor_color);
-                gizmos.draw_line(pos2.0, pos2.0 + rot2 * joint.local_anchor_2(), anchor_color);
+                gizmos.draw_line(
+                    pos1.0,
+                    pos1.0 + rot1 * joint.local_anchor_1(),
+                    AQUAMARINE.into(),
+                );
+                gizmos.draw_line(
+                    pos2.0,
+                    pos2.0 + rot2 * joint.local_anchor_2(),
+                    FUCHSIA.into(),
+                );
             }
             if let Some(mut separation_color) = config.joint_separation_color {
                 // If both bodies are sleeping, multiply the color by the sleeping color multiplier
@@ -403,7 +419,7 @@ fn debug_render_joints<T: Joint>(
                 gizmos.draw_line(
                     pos1.0 + rot1 * joint.local_anchor_1(),
                     pos2.0 + rot2 * joint.local_anchor_2(),
-                    separation_color,
+                    BLUE.into(),
                 );
             }
         }

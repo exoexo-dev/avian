@@ -2,6 +2,7 @@
 
 use crate::{dynamics::solver::xpbd::*, prelude::*};
 use bevy::{
+    color::palettes::css::ALICE_BLUE,
     ecs::{
         entity::{EntityMapper, MapEntities},
         reflect::ReflectMapEntities,
@@ -181,6 +182,15 @@ impl Joint for RevoluteJoint {
 
     fn damping_angular(&self) -> Scalar {
         self.damping_angular
+    }
+
+    fn debug_render(&self, gizmos: &mut Gizmos<PhysicsGizmos>, pos: Position, rot: Rotation) {
+        #[cfg(feature = "3d")]
+        {
+            let midpoint = pos.0 + rot * self.local_anchor_1();
+            let axis = rot * (0.5 * (self.local_rotation1 * self.aligned_axis));
+            gizmos.draw_line(midpoint - axis, midpoint + axis, ALICE_BLUE.into());
+        }
     }
 }
 
